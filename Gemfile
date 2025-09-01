@@ -21,5 +21,9 @@ group :development, :test do
   gem 'factory_bot_rails', '~> 6.4.3'
 end
 
+group :test do
+  gem 'shoulda-matchers', '~> 5.3.0'
+end
+
 group :development do
 end
