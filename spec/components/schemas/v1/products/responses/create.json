@@ -1,5 +1,4 @@
 {
-    "create": {
-        "$ref": "#/components/schemas/Product"
-    }
+    "title": "Create Product Response",
+    "$ref": "#/components/schemas/v1/products/_common"
 }

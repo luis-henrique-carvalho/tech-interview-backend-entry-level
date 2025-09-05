@@ -8,16 +8,16 @@
     "name": {
       "type": "string"
     },
-    "quantity": {
-      "type": "integer"
+    "price": {
+      "type": "string"
     },
-    "unit_price": {
-      "type": "number",
-      "format": "decimal"
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
     },
-    "total_price": {
-      "type": "number",
-      "format": "decimal"
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
     }
   }
 }

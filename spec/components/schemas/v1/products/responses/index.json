@@ -1,8 +1,7 @@
 {
-    "index": {
-        "type": "array",
-        "items": {
-            "$ref": "#/components/schemas/Product"
-        }
+    "title": "Index Products Response",
+    "type": "array",
+    "items": {
+        "$ref": "#/components/schemas/v1/products/_common"
     }
 }

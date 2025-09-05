@@ -1,5 +1,4 @@
 {
-    "show": {
-        "$ref": "#/components/schemas/Product"
-    }
+    "title": "Show Product Response",
+    "$ref": "#/components/schemas/v1/products/_common"
 }

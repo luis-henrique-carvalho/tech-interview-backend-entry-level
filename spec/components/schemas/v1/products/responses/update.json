@@ -1,5 +1,4 @@
 {
-    "update": {
-        "$ref": "#/components/schemas/Product"
-    }
+    "title": "Update Product Response",
+    "$ref": "#/components/schemas/v1/products/_common"
 }

@@ -1,26 +1,25 @@
 {
-    "create": {
-        "type": "object",
-        "properties": {
-            "product": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "price": {
-                        "type": "number",
-                        "format": "decimal"
-                    }
+    "title": "Create Product Request",
+    "type": "object",
+    "properties": {
+        "product": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
                 },
-                "required": [
-                    "name",
-                    "price"
-                ]
-            }
-        },
-        "required": [
-            "product"
-        ]
-    }
+                "price": {
+                    "type": "number",
+                    "format": "decimal"
+                }
+            },
+            "required": [
+                "name",
+                "price"
+            ]
+        }
+    },
+    "required": [
+        "product"
+    ]
 }

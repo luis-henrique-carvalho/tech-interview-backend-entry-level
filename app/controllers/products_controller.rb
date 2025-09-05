@@ -1,6 +1,8 @@
 class ProductsController < ApplicationController
   before_action :set_product, only: %i[ show update destroy ]
 
+  rescue_from ActiveRecord::RecordNotFound, with: :resource_not_found
+
   # GET /products
   def index
     @products = Product.all
@@ -47,5 +49,9 @@ class ProductsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def product_params
       params.require(:product).permit(:name, :price)
+    end
+
+    def resource_not_found
+      render json: { error: 'Resource not found.' }, status: :not_found
     end
 end

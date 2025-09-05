@@ -9,10 +9,11 @@ RSpec.describe 'Products API', type: :request do
       consumes 'application/json'
       produces 'application/json'
 
-
       before do
         create_list(:product, 3, name: 'Test Product', price: 10.00)
       end
+
+      generate_response_examples
 
       response 200, 'Successful' do
         schema '$ref' => '#/components/schemas/v1/products/responses/index'
@@ -39,6 +40,7 @@ RSpec.describe 'Products API', type: :request do
 
       let(:product) { nil }
 
+      generate_response_examples
 
       response 201, 'Successful' do
         let(:product) { { product: { name: 'New Product', price: 15.99 } } }
@@ -81,6 +83,7 @@ RSpec.describe 'Products API', type: :request do
 
       let(:id) { nil }
 
+      generate_response_examples
 
       response 200, 'Successful' do
         let(:id) { create(:product, name: 'Test Product', price: 20.00).id }
@@ -116,6 +119,7 @@ RSpec.describe 'Products API', type: :request do
       let(:id) { nil }
       let(:product) { nil }
 
+      generate_response_examples
 
       response 200, 'Successful' do
         let(:id) { create(:product, name: 'Original Product', price: 10.00).id }
@@ -166,7 +170,6 @@ RSpec.describe 'Products API', type: :request do
       consumes 'application/json'
 
       let(:id) { nil }
-
 
       response 204, 'Successful' do
         let(:id) { create(:product).id }
