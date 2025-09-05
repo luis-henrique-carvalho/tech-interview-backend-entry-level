@@ -61,6 +61,28 @@ RSpec.describe 'Carts API', type: :request do
         run_test!
       end
 
+      response 201, 'Successful - Update existing item' do
+        let!(:product) { create(:product, name: 'Test Product', price: 10.00) }
+        let(:cart_item) { { cart: { product_id: product.id, quantity: 3 } } }
+
+        before do
+          post '/carts', params: { cart: { product_id: product.id, quantity: 1 } }
+        end
+
+        schema '$ref' => '#/components/schemas/v1/carts/responses/create'
+
+        it 'updates existing item quantity' do
+          cart_product = response_body['products'].first
+          expect(cart_product['quantity']).to eq(3) # Should replace, not add
+        end
+
+        it 'returns correct total price' do
+          expect(response_body['total_price']).to eq(30.0) # 3 * 10.0
+        end
+
+        run_test!
+      end
+
       response 404, 'Product not found' do
         let(:cart_item) { { cart: { product_id: 999, quantity: 1 } } }
 
@@ -69,6 +91,32 @@ RSpec.describe 'Carts API', type: :request do
         end
 
         run_test!
+      end
+
+      response 422, 'Validation errors' do
+        let!(:product) { create(:product) }
+
+        context 'with invalid quantity' do
+          let(:cart_item) { { cart: { product_id: product.id, quantity: 0 } } }
+
+          it 'returns validation errors' do
+            expect(response.status).to eq(422)
+            expect(response_body).to have_key('errors')
+          end
+
+          run_test!
+        end
+
+        context 'with negative quantity' do
+          let(:cart_item) { { cart: { product_id: product.id, quantity: -1 } } }
+
+          it 'returns validation errors' do
+            expect(response.status).to eq(422)
+            expect(response_body).to have_key('errors')
+          end
+
+          run_test!
+        end
       end
     end
   end
@@ -107,6 +155,25 @@ RSpec.describe 'Carts API', type: :request do
         run_test!
       end
 
+      response 200, 'Successful - Add new item to cart' do
+        let!(:product) { create(:product, name: 'New Product', price: 15.00) }
+        let(:cart_item) { { cart: { product_id: product.id, quantity: 2 } } }
+
+        schema '$ref' => '#/components/schemas/v1/carts/responses/add_item'
+
+        it 'creates new item in cart' do
+          cart_product = response_body['products'].first
+          expect(cart_product['name']).to eq('New Product')
+          expect(cart_product['quantity']).to eq(2)
+        end
+
+        it 'returns correct total price' do
+          expect(response_body['total_price']).to eq(30.0) # 2 * 15.0
+        end
+
+        run_test!
+      end
+
       response 404, 'Product not found' do
         let(:cart_item) { { cart: { product_id: 999, quantity: 1 } } }
 
@@ -115,6 +182,32 @@ RSpec.describe 'Carts API', type: :request do
         end
 
         run_test!
+      end
+
+      response 422, 'Validation errors' do
+        let!(:product) { create(:product) }
+
+        context 'with invalid quantity' do
+          let(:cart_item) { { cart: { product_id: product.id, quantity: 0 } } }
+
+          it 'returns validation errors' do
+            expect(response.status).to eq(422)
+            expect(response_body).to have_key('errors')
+          end
+
+          run_test!
+        end
+
+        context 'with negative quantity' do
+          let(:cart_item) { { cart: { product_id: product.id, quantity: -1 } } }
+
+          it 'returns validation errors' do
+            expect(response.status).to eq(422)
+            expect(response_body).to have_key('errors')
+          end
+
+          run_test!
+        end
       end
     end
   end
