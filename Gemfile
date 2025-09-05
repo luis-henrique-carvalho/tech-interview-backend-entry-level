@@ -21,6 +21,9 @@ group :development, :test do
   gem 'factory_bot_rails', '~> 6.4.3'
 
   gem 'annotaterb'
+  gem 'rswag'
+  gem 'rswag-api'
+  gem 'rswag-ui'
 end
 
 group :test do

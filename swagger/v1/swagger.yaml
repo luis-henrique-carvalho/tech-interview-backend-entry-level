@@ -1,0 +1,243 @@
+---
+openapi: 3.0.1
+info:
+  title: Tech Interview Backend API
+  version: v1
+  description: API para sistema de e-commerce com produtos e carrinho de compras
+paths:
+  "/products":
+    get:
+      summary: List all products
+      tags:
+      - Products
+      responses:
+        '200':
+          description: Products list returned successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Product"
+    post:
+      summary: Create a new product
+      tags:
+      - Products
+      parameters: []
+      responses:
+        '201':
+          description: Product created successfully
+        '422':
+          description: Validation error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    price:
+                      type: number
+                      format: decimal
+                  required:
+                  - name
+                  - price
+  "/products/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get a specific product
+      tags:
+      - Products
+      responses:
+        '200':
+          description: Product found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Product"
+        '404':
+          description: Product not found
+    patch:
+      summary: Update a product
+      tags:
+      - Products
+      parameters: []
+      responses:
+        '200':
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Product"
+        '422':
+          description: Validation error
+        '404':
+          description: Product not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    price:
+                      type: number
+                      format: decimal
+    delete:
+      summary: Delete a product
+      tags:
+      - Products
+      responses:
+        '204':
+          description: Product deleted successfully
+        '404':
+          description: Product not found
+  "/carts":
+    get:
+      summary: Get current cart
+      tags:
+      - Carts
+      responses:
+        '200':
+          description: Cart returned successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Cart"
+    post:
+      summary: Add item to cart
+      tags:
+      - Carts
+      parameters: []
+      responses:
+        '201':
+          description: Item added to cart successfully
+        '404':
+          description: Product not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cart:
+                  type: object
+                  properties:
+                    product_id:
+                      type: integer
+                    quantity:
+                      type: integer
+                  required:
+                  - product_id
+                  - quantity
+              required:
+              - cart
+  "/carts/add_item":
+    post:
+      summary: Add quantity to existing item
+      tags:
+      - Carts
+      parameters: []
+      responses:
+        '200':
+          description: Quantity added successfully
+        '404':
+          description: Product not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cart:
+                  type: object
+                  properties:
+                    product_id:
+                      type: integer
+                    quantity:
+                      type: integer
+                  required:
+                  - product_id
+                  - quantity
+              required:
+              - cart
+  "/carts/{product_id}":
+    parameters:
+    - name: product_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    delete:
+      summary: Remove item from cart
+      tags:
+      - Carts
+      responses:
+        '200':
+          description: Item removed successfully
+        '404':
+          description: Item not found in cart
+servers:
+- url: http://localhost:3000
+  description: Servidor de desenvolvimento
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        quantity:
+          type: integer
+        unit_price:
+          type: string
+        total_price:
+          type: string
+    Cart:
+      type: object
+      properties:
+        id:
+          type: integer
+        products:
+          type: array
+          items:
+            "$ref": "#/components/schemas/CartItem"
+        total_price:
+          type: string
+    Error:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string

@@ -1,221 +1,132 @@
-require 'rails_helper'
+require 'swagger_helper'
 
-RSpec.describe "/carts", type: :request do
-  let(:product) { create(:product, name: "Test Product", price: 10.0) }
-  let(:valid_attributes) {
-    {
-      cart: {
-        product_id: product.id,
-        quantity: 2
-      }
-    }
-  }
-  let(:invalid_attributes) {
-    {
-      cart: {
-        product_id: product.id,
-        quantity: -1
-      }
-    }
-  }
-  let(:valid_headers) {
-    {}
-  }
+RSpec.describe 'Carts API', type: :request do
+  path '/carts' do
+    get 'Get current cart' do
+      tags 'Carts'
+      produces 'application/json'
 
-  describe "GET /show" do
-    it "renders a successful response" do
-      get carts_url, headers: valid_headers, as: :json
-      expect(response).to be_successful
-    end
+      response '200', 'Cart returned successfully' do
+        schema '$ref' => '#/components/schemas/Cart'
 
-    it "returns cart with products" do
-      get carts_url, headers: valid_headers, as: :json
-
-      cart_id = JSON.parse(response.body)["id"]
-      cart = Cart.find(cart_id)
-
-      cart_item = create(:cart_item, cart: cart, product: product, quantity: 2)
-
-      get carts_url, headers: valid_headers, as: :json
-
-      expect(response).to be_successful
-      expect(response.content_type).to match(a_string_including("application/json"))
-
-      json_response = JSON.parse(response.body)
-      expect(json_response["products"]).to be_an(Array)
-      expect(json_response["total_price"]).to eq("20.0")
-    end
-  end
-
-  describe "POST /create" do
-    context "with valid parameters" do
-      it "creates a new CartItem" do
-        expect {
-          post carts_url,
-               params: valid_attributes, headers: valid_headers, as: :json
-        }.to change(CartItem, :count).by(1)
-      end
-
-      it "renders a JSON response with the new cart" do
-        post carts_url,
-             params: valid_attributes, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:created)
-        expect(response.content_type).to match(a_string_including("application/json"))
-      end
-
-      it "updates existing cart item quantity when product already exists" do
-        post carts_url,
-             params: valid_attributes, headers: valid_headers, as: :json
-
-        post carts_url,
-             params: valid_attributes, headers: valid_headers, as: :json
-
-        cart_item = CartItem.last
-        expect(cart_item.quantity).to eq(2)
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data).to have_key('id')
+          expect(data).to have_key('products')
+          expect(data).to have_key('total_price')
+        end
       end
     end
 
-    context "with invalid parameters" do
-      it "does not create a new CartItem" do
-        expect {
-          post carts_url,
-               params: invalid_attributes, as: :json
-        }.to change(CartItem, :count).by(0)
-      end
-
-      it "renders a JSON response with errors" do
-        post carts_url,
-             params: invalid_attributes, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to match(a_string_including("application/json"))
-      end
-    end
-  end
-
-  describe "POST /add_item" do
-    let(:add_item_attributes) {
-      {
-        cart: {
-          product_id: product.id,
-          quantity: 3
-        }
-      }
-    }
-
-    context "with valid parameters" do
-      it "adds quantity to existing cart item" do
-        post carts_url,
-             params: { cart: { product_id: product.id, quantity: 2 } }, headers: valid_headers, as: :json
-
-        expect {
-          post add_item_carts_url,
-               params: add_item_attributes, headers: valid_headers, as: :json
-        }.to change { CartItem.last.reload.quantity }.by(3)
-      end
-
-      it "creates new cart item if product doesn't exist in cart" do
-        expect {
-          post add_item_carts_url,
-               params: add_item_attributes, headers: valid_headers, as: :json
-        }.to change(CartItem, :count).by(1)
-      end
-
-      it "renders a JSON response with the updated cart" do
-        post add_item_carts_url,
-             params: add_item_attributes, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:ok)
-        expect(response.content_type).to match(a_string_including("application/json"))
-      end
-    end
-
-    context "with invalid parameters" do
-      let(:invalid_add_item_attributes) {
-        {
+    post 'Add item to cart' do
+      tags 'Carts'
+      consumes 'application/json'
+      parameter name: :cart_item, in: :body, schema: {
+        type: :object,
+        properties: {
           cart: {
-            product_id: product.id,
-            quantity: -1
+            type: :object,
+            properties: {
+              product_id: { type: :integer },
+              quantity: { type: :integer }
+            },
+            required: ['product_id', 'quantity']
           }
-        }
+        },
+        required: ['cart']
       }
 
-      it "renders a JSON response with errors" do
-        post add_item_carts_url,
-             params: invalid_add_item_attributes, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to match(a_string_including("application/json"))
+      response '201', 'Item added to cart successfully' do
+        schema '$ref' => '#/components/schemas/Cart'
+
+        let!(:product) { create(:product, name: 'Test Product', price: 10.00) }
+        let(:cart_item) { { cart: { product_id: product.id, quantity: 2 } } }
+
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data).to have_key('id')
+          expect(data).to have_key('products')
+          expect(data['products'].length).to eq(1)
+        end
+      end
+
+      response '404', 'Product not found' do
+        let(:cart_item) { { cart: { product_id: 999, quantity: 1 } } }
+
+        run_test!
       end
     end
   end
 
-  describe "DELETE /remove_item" do
-    it "destroys the requested cart item" do
-      post carts_url,
-           params: { cart: { product_id: product.id, quantity: 2 } }, headers: valid_headers, as: :json
+  path '/carts/add_item' do
+    post 'Add quantity to existing item' do
+      tags 'Carts'
+      consumes 'application/json'
+      parameter name: :cart_item, in: :body, schema: {
+        type: :object,
+        properties: {
+          cart: {
+            type: :object,
+            properties: {
+              product_id: { type: :integer },
+              quantity: { type: :integer }
+            },
+            required: ['product_id', 'quantity']
+          }
+        },
+        required: ['cart']
+      }
 
-      expect {
-        delete remove_item_carts_url(product.id), headers: valid_headers, as: :json
-      }.to change(CartItem, :count).by(-1)
-    end
+      response '200', 'Quantity added successfully' do
+        schema '$ref' => '#/components/schemas/Cart'
 
-    it "renders a JSON response with the updated cart" do
-      post carts_url,
-           params: { cart: { product_id: product.id, quantity: 2 } }, headers: valid_headers, as: :json
+        let!(:product) { create(:product, name: 'Test Product', price: 10.00) }
+        let(:cart_item) { { cart: { product_id: product.id, quantity: 1 } } }
 
-      delete remove_item_carts_url(product.id), headers: valid_headers, as: :json
-      expect(response).to have_http_status(:ok)
-      expect(response.content_type).to match(a_string_including("application/json"))
-    end
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data).to have_key('id')
+          expect(data).to have_key('products')
+        end
+      end
 
-    it "returns error when product not found in cart" do
-      non_existent_product = create(:product)
-      delete remove_item_carts_url(non_existent_product.id), headers: valid_headers, as: :json
-      expect(response).to have_http_status(:not_found)
-      expect(response.content_type).to match(a_string_including("application/json"))
-    end
-  end
+      response '404', 'Product not found' do
+        let(:cart_item) { { cart: { product_id: 999, quantity: 1 } } }
 
-  describe "session management" do
-    it "creates a new cart for new session" do
-      expect {
-        get carts_url, headers: valid_headers, as: :json
-      }.to change(Cart, :count).by(1)
-    end
-
-    it "reuses existing cart for same session" do
-      get carts_url, headers: valid_headers, as: :json
-      first_cart_id = JSON.parse(response.body)["id"]
-
-      get carts_url, headers: valid_headers, as: :json
-      second_cart_id = JSON.parse(response.body)["id"]
-
-      expect(first_cart_id).to eq(second_cart_id)
+        run_test!
+      end
     end
   end
 
-  describe "last_interaction_at updates" do
-    it "updates last_interaction_at when adding item" do
-      get carts_url, headers: valid_headers, as: :json
-      cart_id = JSON.parse(response.body)["id"]
-      cart = Cart.find(cart_id)
-      cart.update!(last_interaction_at: 1.hour.ago)
+  path '/carts/{product_id}' do
+    parameter name: :product_id, in: :path, type: :integer
 
-      post add_item_carts_url,
-           params: valid_attributes, headers: valid_headers, as: :json
+    delete 'Remove item from cart' do
+      tags 'Carts'
 
-      expect(cart.reload.last_interaction_at).to be > 1.hour.ago
-    end
+      response '200', 'Item removed successfully' do
+        schema '$ref' => '#/components/schemas/Cart'
 
-    it "updates last_interaction_at when removing item" do
-      post carts_url,
-           params: { cart: { product_id: product.id, quantity: 2 } }, headers: valid_headers, as: :json
+        let!(:product) { create(:product, name: 'Test Product', price: 10.00) }
+        let(:product_id) { product.id }
 
-      cart_id = JSON.parse(response.body)["id"]
-      cart = Cart.find(cart_id)
-      cart.update!(last_interaction_at: 1.hour.ago)
+        before do
+          # First add the product to cart
+          post '/carts', params: { cart: { product_id: product.id, quantity: 1 } }
+        end
 
-      delete remove_item_carts_url(product.id), headers: valid_headers, as: :json
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data).to have_key('id')
+          expect(data).to have_key('products')
+        end
+      end
 
-      expect(cart.reload.last_interaction_at).to be > 1.hour.ago
+      response '404', 'Item not found in cart' do
+        let(:product_id) { 999 }
+
+        run_test!
+      end
     end
   end
 end

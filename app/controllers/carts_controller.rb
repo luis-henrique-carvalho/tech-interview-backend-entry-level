@@ -64,7 +64,6 @@ class CartsController < ApplicationController
   end
 
   def generate_session_id
-    puts "Generating session id"
     SecureRandom.uuid
   end
 

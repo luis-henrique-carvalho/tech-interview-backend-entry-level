@@ -1,119 +1,156 @@
-require 'rails_helper'
+require 'swagger_helper'
 
-RSpec.describe "/products", type: :request do
-  let(:valid_attributes) {
-    {
-      name: 'A product',
-      price: 1
-    }
-  }
+RSpec.describe 'Products API', type: :request do
+  path '/products' do
+    get 'List all products' do
+      tags 'Products'
+      produces 'application/json'
 
-  let(:invalid_attributes) {
-    {
-      price: -1
-    }
-  }
+      response '200', 'Products list returned successfully' do
+        schema type: :array,
+               items: { '$ref' => '#/components/schemas/Product' }
 
-  let(:valid_headers) {
-    {}
-  }
+        let!(:product1) { create(:product, name: 'Produto 1', price: 10.50) }
+        let!(:product2) { create(:product, name: 'Produto 2', price: 25.00) }
 
-  describe "GET /index" do
-    it "renders a successful response" do
-      Product.create! valid_attributes
-      get products_url, headers: valid_headers, as: :json
-      expect(response).to be_successful
-    end
-  end
-
-  describe "GET /show" do
-    it "renders a successful response" do
-      product = Product.create! valid_attributes
-      get product_url(product), as: :json
-      expect(response).to be_successful
-    end
-  end
-
-  describe "POST /create" do
-    context "with valid parameters" do
-      it "creates a new Product" do
-        expect {
-          post products_url,
-               params: { product: valid_attributes }, headers: valid_headers, as: :json
-        }.to change(Product, :count).by(1)
-      end
-
-      it "renders a JSON response with the new product" do
-        post products_url,
-             params: { product: valid_attributes }, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:created)
-        expect(response.content_type).to match(a_string_including("application/json"))
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data.length).to eq(2)
+          expect(data.first['name']).to eq('Produto 1')
+          expect(data.first['price']).to eq('10.5')
+        end
       end
     end
 
-    context "with invalid parameters" do
-      it "does not create a new Product" do
-        expect {
-          post products_url,
-               params: { product: invalid_attributes }, as: :json
-        }.to change(Product, :count).by(0)
-      end
-
-      it "renders a JSON response with errors for the new product" do
-        post products_url,
-             params: { product: invalid_attributes }, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to match(a_string_including("application/json"))
-      end
-    end
-  end
-
-  describe "PATCH /update" do
-    context "with valid parameters" do
-      let(:new_name) { 'Another name' }
-      let(:new_price) { 2 }
-      let(:new_attributes) {
-        {
-          name: new_name,
-          price: new_price
+    post 'Create a new product' do
+      tags 'Products'
+      consumes 'application/json'
+      produces 'application/json'
+      parameter name: :product, in: :body, schema: {
+        type: :object,
+        properties: {
+          product: {
+            type: :object,
+            properties: {
+              name: { type: :string },
+              price: { type: :number, format: :decimal }
+            },
+            required: ['name', 'price']
+          }
         }
       }
 
-      it "updates the requested product" do
-        product = Product.create! valid_attributes
-        patch product_url(product),
-              params: { product: new_attributes }, headers: valid_headers, as: :json
-        product.reload
-        expect(product.name).to eq(new_name)
-        expect(product.price).to eq(new_price)
+      response '201', 'Product created successfully' do
+        let(:product) { { product: { name: 'Novo Produto', price: 15.99 } } }
+
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data['name']).to eq('Novo Produto')
+          expect(data['price']).to eq('15.99')
+        end
       end
 
-      it "renders a JSON response with the product" do
-        product = Product.create! valid_attributes
-        patch product_url(product),
-              params: { product: new_attributes }, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:ok)
-        expect(response.content_type).to match(a_string_including("application/json"))
-      end
-    end
+      response '422', 'Validation error' do
+        let(:product) { { product: { name: '', price: -1 } } }
 
-    context "with invalid parameters" do
-      it "renders a JSON response with errors for the product" do
-        product = Product.create! valid_attributes
-        patch product_url(product),
-              params: { product: invalid_attributes }, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to match(a_string_including("application/json"))
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data).to have_key('name')
+          expect(data).to have_key('price')
+        end
       end
     end
   end
 
-  describe "DELETE /destroy" do
-    it "destroys the requested product" do
-      product = Product.create! valid_attributes
-      expect {
-        delete product_url(product), headers: valid_headers, as: :json
-      }.to change(Product, :count).by(-1)
+  path '/products/{id}' do
+    parameter name: :id, in: :path, type: :integer
+
+    get 'Get a specific product' do
+      tags 'Products'
+      produces 'application/json'
+
+      response '200', 'Product found' do
+        schema '$ref' => '#/components/schemas/Product'
+
+        let(:id) { create(:product, name: 'Produto Teste', price: 20.00).id }
+
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data['name']).to eq('Produto Teste')
+          expect(data['price']).to eq('20.0')
+        end
+      end
+
+      response '404', 'Product not found' do
+        let(:id) { 999999 }
+
+        run_test!
+      end
+    end
+
+    patch 'Update a product' do
+      tags 'Products'
+      consumes 'application/json'
+      produces 'application/json'
+      parameter name: :product, in: :body, schema: {
+        type: :object,
+        properties: {
+          product: {
+            type: :object,
+            properties: {
+              name: { type: :string },
+              price: { type: :number, format: :decimal }
+            }
+          }
+        }
+      }
+
+      response '200', 'Product updated successfully' do
+        schema '$ref' => '#/components/schemas/Product'
+
+        let(:id) { create(:product, name: 'Produto Original', price: 10.00).id }
+        let(:product) { { product: { name: 'Produto Atualizado', price: 15.00 } } }
+
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data['name']).to eq('Produto Atualizado')
+          expect(data['price']).to eq('15.0')
+        end
+      end
+
+      response '422', 'Validation error' do
+        let(:id) { create(:product).id }
+        let(:product) { { product: { name: '', price: -1 } } }
+
+        run_test! do |response|
+          data = JSON.parse(response.body)
+          expect(data).to have_key('name')
+          expect(data).to have_key('price')
+        end
+      end
+
+      response '404', 'Product not found' do
+        let(:id) { 999999 }
+        let(:product) { { product: { name: 'Teste' } } }
+
+        run_test!
+      end
+    end
+
+    delete 'Delete a product' do
+      tags 'Products'
+
+      response '204', 'Product deleted successfully' do
+        let(:id) { create(:product).id }
+
+        run_test!
+      end
+
+      response '404', 'Product not found' do
+        let(:id) { 999999 }
+
+        run_test!
+      end
     end
   end
 end
