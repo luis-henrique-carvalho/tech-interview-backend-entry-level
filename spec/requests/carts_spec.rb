@@ -3,7 +3,7 @@
 require 'swagger_helper'
 
 RSpec.describe 'Carts API', type: :request do
-  path '/carts' do
+  path '/cart' do
     get 'Get current cart', params: { use_as_request_example: true } do
       tags 'Carts'
       consumes 'application/json'
@@ -14,7 +14,7 @@ RSpec.describe 'Carts API', type: :request do
         let!(:product) { create(:product, name: 'Test Product', price: 10.00) }
 
         before do
-          post '/carts', params: { cart: { product_id: product.id, quantity: 3 } }
+          post '/cart', params: { cart: { product_id: product.id, quantity: 3 } }
         end
 
         schema '$ref' => '#/components/schemas/v1/carts/responses/show'
@@ -86,7 +86,7 @@ RSpec.describe 'Carts API', type: :request do
         let(:cart_item) { { cart: { product_id: product.id, quantity: 3 } } }
 
         before do
-          post '/carts', params: { cart: { product_id: product.id, quantity: 1 } }
+          post '/cart', params: { cart: { product_id: product.id, quantity: 1 } }
         end
 
         schema '$ref' => '#/components/schemas/v1/carts/responses/create'
@@ -141,7 +141,7 @@ RSpec.describe 'Carts API', type: :request do
     end
   end
 
-  path '/carts/add_item' do
+  path '/cart/add_item' do
     post 'Add quantity to existing item', params: { use_as_request_example: true } do
       tags 'Carts'
       consumes 'application/json'
@@ -156,7 +156,7 @@ RSpec.describe 'Carts API', type: :request do
         let(:cart_item) { { cart: { product_id: product.id, quantity: 1 } } }
 
         before do
-          post '/carts', params: { cart: { product_id: product.id, quantity: 1 } }
+          post '/cart', params: { cart: { product_id: product.id, quantity: 1 } }
         end
 
         schema '$ref' => '#/components/schemas/v1/carts/responses/add_item'
@@ -232,7 +232,7 @@ RSpec.describe 'Carts API', type: :request do
     end
   end
 
-  path '/carts/{product_id}' do
+  path '/cart/{product_id}' do
     parameter name: :product_id, in: :path, type: :string
 
     delete 'Remove item from cart', params: { use_as_request_example: true } do
@@ -248,7 +248,7 @@ RSpec.describe 'Carts API', type: :request do
         let(:product_id) { product.id }
 
         before do
-          post '/carts', params: { cart: { product_id: product.id, quantity: 1 } }
+          post '/cart', params: { cart: { product_id: product.id, quantity: 1 } }
         end
 
           schema '$ref' => '#/components/schemas/v1/carts/responses/remove_item'

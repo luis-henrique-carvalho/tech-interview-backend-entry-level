@@ -16,7 +16,7 @@
 #  index_carts_on_session_id    (session_id)
 #
 class Cart < ApplicationRecord
-  validates_numericality_of :total_price, greater_than_or_equal_to: 0
+  validates :total_price, numericality: { greater_than_or_equal_to: 0 }
 
   has_many :cart_items, dependent: :destroy
   has_many :products, through: :cart_items

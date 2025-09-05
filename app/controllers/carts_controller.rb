@@ -1,6 +1,6 @@
 class CartsController < ApplicationController
   before_action :set_cart
-  after_action :update_last_interaction_at, only: %i[add_item remove_item]
+  after_action :update_last_interaction_at, only: %i[create add_item remove_item]
 
   rescue_from ActiveRecord::RecordNotFound, with: :resource_not_found
 

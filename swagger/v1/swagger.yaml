@@ -4,13 +4,13 @@ info:
   title: API V1
   version: v1
 paths:
-  "/carts":
+  "/cart":
     get:
       summary: Get current cart
       tags:
-      - Carts
+        - Carts
       responses:
-        '200':
+        "200":
           description: Successful
           content:
             application/json:
@@ -19,19 +19,19 @@ paths:
                   value:
                     id: 2669
                     products:
-                    - id: 1606
-                      name: Test Product
-                      quantity: 3
-                      unit_price: 10.0
-                      total_price: 30.0
+                      - id: 1606
+                        name: Test Product
+                        quantity: 3
+                        unit_price: 10.0
+                        total_price: 30.0
                     total_price: 30.0
     post:
       summary: Create cart
       tags:
-      - Carts
+        - Carts
       parameters: []
       responses:
-        '201':
+        "201":
           description: Successful - Update existing item
           content:
             application/json:
@@ -40,13 +40,13 @@ paths:
                   value:
                     id: 2676
                     products:
-                    - id: 1613
-                      name: Test Product
-                      quantity: 3
-                      unit_price: 10.0
-                      total_price: 30.0
+                      - id: 1613
+                        name: Test Product
+                        quantity: 3
+                        unit_price: 10.0
+                        total_price: 30.0
                     total_price: 30.0
-        '404':
+        "404":
           description: Product not found
           content:
             application/json:
@@ -54,7 +54,7 @@ paths:
                 Default:
                   value:
                     error: Resource not found.
-        '422':
+        "422":
           description: Validation errors
           content:
             application/json:
@@ -62,20 +62,20 @@ paths:
                 Default:
                   value:
                     errors:
-                    - Quantity must be greater than 0
+                      - Quantity must be greater than 0
       requestBody:
         content:
           application/json:
             schema:
               "$ref": "#/components/schemas/v1/carts/requests/create"
-  "/carts/add_item":
+  "/cart/add_item":
     post:
       summary: Add quantity to existing item
       tags:
-      - Carts
+        - Carts
       parameters: []
       responses:
-        '200':
+        "200":
           description: Successful - Add new item to cart
           content:
             application/json:
@@ -84,13 +84,13 @@ paths:
                   value:
                     id: 2688
                     products:
-                    - id: 1623
-                      name: New Product
-                      quantity: 2
-                      unit_price: 15.0
-                      total_price: 30.0
+                      - id: 1623
+                        name: New Product
+                        quantity: 2
+                        unit_price: 15.0
+                        total_price: 30.0
                     total_price: 30.0
-        '404':
+        "404":
           description: Product not found
           content:
             application/json:
@@ -98,7 +98,7 @@ paths:
                 Default:
                   value:
                     error: Resource not found.
-        '422':
+        "422":
           description: Validation errors
           content:
             application/json:
@@ -106,25 +106,25 @@ paths:
                 Default:
                   value:
                     errors:
-                    - Quantity must be greater than 0
+                      - Quantity must be greater than 0
       requestBody:
         content:
           application/json:
             schema:
               "$ref": "#/components/schemas/v1/carts/requests/add_item"
-  "/carts/{product_id}":
+  "/cart/{product_id}":
     parameters:
-    - name: product_id
-      in: path
-      required: true
-      schema:
-        type: string
+      - name: product_id
+        in: path
+        required: true
+        schema:
+          type: string
     delete:
       summary: Remove item from cart
       tags:
-      - Carts
+        - Carts
       responses:
-        '200':
+        "200":
           description: Successful
           content:
             application/json:
@@ -134,7 +134,7 @@ paths:
                     id: 2697
                     products: []
                     total_price: 0.0
-        '404':
+        "404":
           description: Item not found in cart
           content:
             application/json:
@@ -146,39 +146,39 @@ paths:
     get:
       summary: List all products
       tags:
-      - Products
+        - Products
       responses:
-        '200':
+        "200":
           description: Successful
           content:
             application/json:
               examples:
                 Default:
                   value:
-                  - id: 1638
-                    name: Test Product
-                    price: '10.0'
-                    created_at: '2025-09-05T03:16:46.135Z'
-                    updated_at: '2025-09-05T03:16:46.135Z'
-                  - id: 1639
-                    name: Test Product
-                    price: '10.0'
-                    created_at: '2025-09-05T03:16:46.138Z'
-                    updated_at: '2025-09-05T03:16:46.138Z'
-                  - id: 1640
-                    name: Test Product
-                    price: '10.0'
-                    created_at: '2025-09-05T03:16:46.140Z'
-                    updated_at: '2025-09-05T03:16:46.140Z'
+                    - id: 1638
+                      name: Test Product
+                      price: "10.0"
+                      created_at: "2025-09-05T03:16:46.135Z"
+                      updated_at: "2025-09-05T03:16:46.135Z"
+                    - id: 1639
+                      name: Test Product
+                      price: "10.0"
+                      created_at: "2025-09-05T03:16:46.138Z"
+                      updated_at: "2025-09-05T03:16:46.138Z"
+                    - id: 1640
+                      name: Test Product
+                      price: "10.0"
+                      created_at: "2025-09-05T03:16:46.140Z"
+                      updated_at: "2025-09-05T03:16:46.140Z"
               schema:
                 "$ref": "#/components/schemas/v1/products/responses/index"
     post:
       summary: Create a new product
       tags:
-      - Products
+        - Products
       parameters: []
       responses:
-        '201':
+        "201":
           description: Successful
           content:
             application/json:
@@ -187,12 +187,12 @@ paths:
                   value:
                     id: 1643
                     name: New Product
-                    price: '15.99'
-                    created_at: '2025-09-05T03:16:46.165Z'
-                    updated_at: '2025-09-05T03:16:46.165Z'
+                    price: "15.99"
+                    created_at: "2025-09-05T03:16:46.165Z"
+                    updated_at: "2025-09-05T03:16:46.165Z"
               schema:
                 "$ref": "#/components/schemas/v1/products/responses/create"
-        '422':
+        "422":
           description: Validation errors
           content:
             application/json:
@@ -200,9 +200,9 @@ paths:
                 Default:
                   value:
                     name:
-                    - can't be blank
+                      - can't be blank
                     price:
-                    - must be greater than or equal to 0
+                      - must be greater than or equal to 0
       requestBody:
         content:
           application/json:
@@ -210,17 +210,17 @@ paths:
               "$ref": "#/components/schemas/v1/products/requests/create"
   "/products/{id}":
     parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       summary: Show product
       tags:
-      - Products
+        - Products
       responses:
-        '200':
+        "200":
           description: Successful
           content:
             application/json:
@@ -229,12 +229,12 @@ paths:
                   value:
                     id: 1646
                     name: Test Product
-                    price: '20.0'
-                    created_at: '2025-09-05T03:16:46.203Z'
-                    updated_at: '2025-09-05T03:16:46.203Z'
+                    price: "20.0"
+                    created_at: "2025-09-05T03:16:46.203Z"
+                    updated_at: "2025-09-05T03:16:46.203Z"
               schema:
                 "$ref": "#/components/schemas/v1/products/responses/show"
-        '404':
+        "404":
           description: Not found
           content:
             application/json:
@@ -245,10 +245,10 @@ paths:
     patch:
       summary: Update product
       tags:
-      - Products
+        - Products
       parameters: []
       responses:
-        '200':
+        "200":
           description: Successful
           content:
             application/json:
@@ -256,13 +256,13 @@ paths:
                 Default:
                   value:
                     name: Updated Product
-                    price: '15.0'
+                    price: "15.0"
                     id: 1651
-                    created_at: '2025-09-05T03:16:46.279Z'
-                    updated_at: '2025-09-05T03:16:46.285Z'
+                    created_at: "2025-09-05T03:16:46.279Z"
+                    updated_at: "2025-09-05T03:16:46.285Z"
               schema:
                 "$ref": "#/components/schemas/v1/products/responses/update"
-        '422':
+        "422":
           description: Validation errors
           content:
             application/json:
@@ -270,10 +270,10 @@ paths:
                 Default:
                   value:
                     name:
-                    - can't be blank
+                      - can't be blank
                     price:
-                    - must be greater than or equal to 0
-        '404':
+                      - must be greater than or equal to 0
+        "404":
           description: Not found
           content:
             application/json:
@@ -289,11 +289,11 @@ paths:
     delete:
       summary: Delete product
       tags:
-      - Products
+        - Products
       responses:
-        '204':
+        "204":
           description: Successful
-        '404':
+        "404":
           description: Not found
 components:
   securitySchemes:
@@ -381,10 +381,10 @@ components:
                   quantity:
                     type: integer
                 required:
-                - product_id
-                - quantity
+                  - product_id
+                  - quantity
             required:
-            - cart
+              - cart
           create:
             title: Create Cart Request
             type: object
@@ -397,10 +397,10 @@ components:
                   quantity:
                     type: integer
                 required:
-                - product_id
-                - quantity
+                  - product_id
+                  - quantity
             required:
-            - cart
+              - cart
           update:
             update:
               type: object
@@ -413,10 +413,10 @@ components:
                     quantity:
                       type: integer
                   required:
-                  - product_id
-                  - quantity
+                    - product_id
+                    - quantity
               required:
-              - cart
+                - cart
         responses:
           add_item:
             title: Add Item to Cart Response
@@ -461,10 +461,10 @@ components:
                     type: number
                     format: decimal
                 required:
-                - name
-                - price
+                  - name
+                  - price
             required:
-            - product
+              - product
           update:
             title: Update Product Request
             type: object
@@ -478,7 +478,7 @@ components:
                     type: number
                     format: decimal
             required:
-            - product
+              - product
         responses:
           create:
             title: Create Product Response
@@ -495,4 +495,4 @@ components:
             title: Update Product Response
             "$ref": "#/components/schemas/v1/products/_common"
 servers:
-- url: http://localhost:3000
+  - url: http://localhost:3000
