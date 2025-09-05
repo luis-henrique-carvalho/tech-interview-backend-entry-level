@@ -1,0 +1,5 @@
+mark_cart_as_abandoned:
+  class: MarkCartAsAbandonedJob
+  cron: "0 */1 * * *"
+  queue: default
+  description: "Marks carts as abandoned and removes old abandoned carts"

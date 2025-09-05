@@ -1,5 +1,6 @@
 class CartsController < ApplicationController
   before_action :set_cart
+  after_action :update_last_interaction_at, only: %i[add_item remove_item]
 
   def show
     render json: format_cart_response(@cart)
@@ -58,7 +59,12 @@ class CartsController < ApplicationController
     end
   end
 
+  def update_last_interaction_at
+    @cart.update(last_interaction_at: Time.current)
+  end
+
   def generate_session_id
+    puts "Generating session id"
     SecureRandom.uuid
   end
 

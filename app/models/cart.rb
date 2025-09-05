@@ -21,9 +21,26 @@ class Cart < ApplicationRecord
   has_many :cart_items, dependent: :destroy
   has_many :products, through: :cart_items
 
+  scope :active, -> { where(abandoned_at: nil) }
+  scope :abandoned, -> { where.not(abandoned_at: nil) }
+  scope :inactive_for, ->(duration) { where(last_interaction_at: ..duration.ago) }
+  scope :abandoned_for, ->(duration) { where(abandoned_at: ..duration.ago) }
+
   def calculate_total_price
     total = cart_items.sum { |item| item.total_price }
 
     self.update(total_price: total)
+  end
+
+  def abandoned?
+    abandoned_at.present?
+  end
+
+  def active?
+    abandoned_at.nil?
+  end
+
+  def mark_as_abandoned!
+    update!(abandoned_at: Time.current)
   end
 end
