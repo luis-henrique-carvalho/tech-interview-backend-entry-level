@@ -17,9 +17,14 @@ paths:
               examples:
                 Default:
                   value:
-                    id: 2424
-                    products: []
-                    total_price: 0.0
+                    id: 2669
+                    products:
+                    - id: 1606
+                      name: Test Product
+                      quantity: 3
+                      unit_price: 10.0
+                      total_price: 30.0
+                    total_price: 30.0
     post:
       summary: Create cart
       tags:
@@ -27,20 +32,20 @@ paths:
       parameters: []
       responses:
         '201':
-          description: Successful
+          description: Successful - Update existing item
           content:
             application/json:
               examples:
                 Default:
                   value:
-                    id: 2428
+                    id: 2676
                     products:
-                    - id: 1376
+                    - id: 1613
                       name: Test Product
-                      quantity: 2
+                      quantity: 3
                       unit_price: 10.0
-                      total_price: 20.0
-                    total_price: 20.0
+                      total_price: 30.0
+                    total_price: 30.0
         '404':
           description: Product not found
           content:
@@ -49,6 +54,15 @@ paths:
                 Default:
                   value:
                     error: Resource not found.
+        '422':
+          description: Validation errors
+          content:
+            application/json:
+              examples:
+                Default:
+                  value:
+                    errors:
+                    - Quantity must be greater than 0
       requestBody:
         content:
           application/json:
@@ -62,20 +76,20 @@ paths:
       parameters: []
       responses:
         '200':
-          description: Successful
+          description: Successful - Add new item to cart
           content:
             application/json:
               examples:
                 Default:
                   value:
-                    id: 2433
+                    id: 2688
                     products:
-                    - id: 1379
-                      name: Test Product
+                    - id: 1623
+                      name: New Product
                       quantity: 2
-                      unit_price: 10.0
-                      total_price: 20.0
-                    total_price: 20.0
+                      unit_price: 15.0
+                      total_price: 30.0
+                    total_price: 30.0
         '404':
           description: Product not found
           content:
@@ -84,6 +98,15 @@ paths:
                 Default:
                   value:
                     error: Resource not found.
+        '422':
+          description: Validation errors
+          content:
+            application/json:
+              examples:
+                Default:
+                  value:
+                    errors:
+                    - Quantity must be greater than 0
       requestBody:
         content:
           application/json:
@@ -108,7 +131,7 @@ paths:
               examples:
                 Default:
                   value:
-                    id: 2438
+                    id: 2697
                     products: []
                     total_price: 0.0
         '404':
@@ -132,21 +155,21 @@ paths:
               examples:
                 Default:
                   value:
-                  - id: 1389
+                  - id: 1638
                     name: Test Product
                     price: '10.0'
-                    created_at: '2025-09-05T03:00:40.515Z'
-                    updated_at: '2025-09-05T03:00:40.515Z'
-                  - id: 1390
+                    created_at: '2025-09-05T03:16:46.135Z'
+                    updated_at: '2025-09-05T03:16:46.135Z'
+                  - id: 1639
                     name: Test Product
                     price: '10.0'
-                    created_at: '2025-09-05T03:00:40.517Z'
-                    updated_at: '2025-09-05T03:00:40.517Z'
-                  - id: 1391
+                    created_at: '2025-09-05T03:16:46.138Z'
+                    updated_at: '2025-09-05T03:16:46.138Z'
+                  - id: 1640
                     name: Test Product
                     price: '10.0'
-                    created_at: '2025-09-05T03:00:40.519Z'
-                    updated_at: '2025-09-05T03:00:40.519Z'
+                    created_at: '2025-09-05T03:16:46.140Z'
+                    updated_at: '2025-09-05T03:16:46.140Z'
               schema:
                 "$ref": "#/components/schemas/v1/products/responses/index"
     post:
@@ -162,11 +185,11 @@ paths:
               examples:
                 Default:
                   value:
-                    id: 1394
+                    id: 1643
                     name: New Product
                     price: '15.99'
-                    created_at: '2025-09-05T03:00:40.542Z'
-                    updated_at: '2025-09-05T03:00:40.542Z'
+                    created_at: '2025-09-05T03:16:46.165Z'
+                    updated_at: '2025-09-05T03:16:46.165Z'
               schema:
                 "$ref": "#/components/schemas/v1/products/responses/create"
         '422':
@@ -204,11 +227,11 @@ paths:
               examples:
                 Default:
                   value:
-                    id: 1396
+                    id: 1646
                     name: Test Product
                     price: '20.0'
-                    created_at: '2025-09-05T03:00:40.559Z'
-                    updated_at: '2025-09-05T03:00:40.559Z'
+                    created_at: '2025-09-05T03:16:46.203Z'
+                    updated_at: '2025-09-05T03:16:46.203Z'
               schema:
                 "$ref": "#/components/schemas/v1/products/responses/show"
         '404':
@@ -234,9 +257,9 @@ paths:
                   value:
                     name: Updated Product
                     price: '15.0'
-                    id: 1399
-                    created_at: '2025-09-05T03:00:40.592Z'
-                    updated_at: '2025-09-05T03:00:40.597Z'
+                    id: 1651
+                    created_at: '2025-09-05T03:16:46.279Z'
+                    updated_at: '2025-09-05T03:16:46.285Z'
               schema:
                 "$ref": "#/components/schemas/v1/products/responses/update"
         '422':

@@ -11,6 +11,12 @@ RSpec.describe 'Carts API', type: :request do
       generate_response_examples
 
       response 200, 'Successful' do
+        let!(:product) { create(:product, name: 'Test Product', price: 10.00) }
+
+        before do
+          post '/carts', params: { cart: { product_id: product.id, quantity: 3 } }
+        end
+
         schema '$ref' => '#/components/schemas/v1/carts/responses/show'
 
         it 'returns the correct data structure' do
@@ -21,6 +27,20 @@ RSpec.describe 'Carts API', type: :request do
 
         it 'returns products as array' do
           expect(response_body['products']).to be_an(Array)
+        end
+
+        it 'returns product with quantity 3' do
+          expect(response_body['products'].length).to eq(1)
+          cart_product = response_body['products'].first
+          expect(cart_product['quantity']).to eq(3)
+          expect(cart_product['name']).to eq('Test Product')
+        end
+
+        it 'returns correct total price for quantity 3' do
+          cart_product = response_body['products'].first
+          expect(cart_product['unit_price']).to eq(10.0)
+          expect(cart_product['total_price']).to eq(30.0) # 3 * 10.0
+          expect(response_body['total_price']).to eq(30.0)
         end
 
         run_test!
@@ -73,11 +93,11 @@ RSpec.describe 'Carts API', type: :request do
 
         it 'updates existing item quantity' do
           cart_product = response_body['products'].first
-          expect(cart_product['quantity']).to eq(3) # Should replace, not add
+          expect(cart_product['quantity']).to eq(3)
         end
 
         it 'returns correct total price' do
-          expect(response_body['total_price']).to eq(30.0) # 3 * 10.0
+          expect(response_body['total_price']).to eq(30.0)
         end
 
         run_test!
@@ -149,7 +169,7 @@ RSpec.describe 'Carts API', type: :request do
 
         it 'returns products with correct quantity' do
           cart_product = response_body['products'].first
-          expect(cart_product['quantity']).to eq(2) # 1 + 1
+          expect(cart_product['quantity']).to eq(2)
         end
 
         run_test!
@@ -168,7 +188,7 @@ RSpec.describe 'Carts API', type: :request do
         end
 
         it 'returns correct total price' do
-          expect(response_body['total_price']).to eq(30.0) # 2 * 15.0
+          expect(response_body['total_price']).to eq(30.0)
         end
 
         run_test!
