@@ -1,0 +1,21 @@
+#!/bin/bash
+# Usage: setup_pg
+# expected ENV: POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USERNAME, POSTGRES_PASSWORD
+# Description:
+# Setup the database if it doesn't exist.
+
+export PGPASSWORD=$POSTGRES_PASSWORD
+
+if echo "\c $POSTGRES_DB; \dt" | psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USERNAME}" ${POSTGRES_DB} | grep schema_migrations 2>&1 >/dev/null
+then
+  echo "🐘 Database exists, running migrations..."
+  bundle exec rails db:migrate
+else
+  echo "🐘 Setup Database"
+  bundle exec rails db:setup
+fi
+
+echo "🧹 Cleaning test database..."
+bundle exec rails db:test:prepare
+
+unset PGPASSWORD

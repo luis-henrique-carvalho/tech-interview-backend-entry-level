@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+
+wait_on_pg
+setup_pg
+bundle exec rspec
+
+# Prevent zombies
+exec $@

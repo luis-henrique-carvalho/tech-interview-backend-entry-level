@@ -1,0 +1,13 @@
+name: Unit Tests
+
+# This will run whener the condition below is matched
+on: push
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run the Tests
+        run: docker compose -f tests/docker-compose-test.yml up --build --exit-code-from orca_mais_test_api

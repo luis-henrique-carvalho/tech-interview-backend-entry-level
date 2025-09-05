@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  orca_mais_test_api:
+    build:
+      context: ../
+      dockerfile: Dockerfile.test
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    links:
+      - db
+    environment:
+      - RAILS_ENV=test
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=store_test
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USERNAME=postgres
+    entrypoint: "/usr/bin/test_entrypoint"
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=store_test
