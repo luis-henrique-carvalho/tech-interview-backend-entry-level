@@ -1,57 +1,72 @@
+# frozen_string_literal: true
+
 require 'swagger_helper'
 
 RSpec.describe 'Carts API', type: :request do
   path '/carts' do
-    get 'Get current cart' do
+    get 'Get current cart', params: { use_as_request_example: true } do
       tags 'Carts'
-      produces 'application/json'
+      consumes 'application/json'
 
-      response '200', 'Cart returned successfully' do
-        schema '$ref' => '#/components/schemas/Cart'
+      generate_response_examples
 
-        run_test! do |response|
-          data = JSON.parse(response.body)
-          expect(data).to have_key('id')
-          expect(data).to have_key('products')
-          expect(data).to have_key('total_price')
+      response 200, 'Successful' do
+        schema '$ref' => '#/components/schemas/v1/carts/responses/show'
+
+        it 'returns the correct data structure' do
+          expect(response_body).to have_key('id')
+          expect(response_body).to have_key('products')
+          expect(response_body).to have_key('total_price')
         end
+
+        it 'returns products as array' do
+          expect(response_body['products']).to be_an(Array)
+        end
+
+        run_test!
       end
     end
 
-    post 'Add item to cart' do
+    post 'Create cart', params: { use_as_request_example: true } do
       tags 'Carts'
       consumes 'application/json'
-      parameter name: :cart_item, in: :body, schema: {
-        type: :object,
-        properties: {
-          cart: {
-            type: :object,
-            properties: {
-              product_id: { type: :integer },
-              quantity: { type: :integer }
-            },
-            required: ['product_id', 'quantity']
-          }
-        },
-        required: ['cart']
-      }
+      parameter name: :cart_item, in: :body, schema: { '$ref' => '#/components/schemas/v1/carts/requests/create' }
 
-      response '201', 'Item added to cart successfully' do
-        schema '$ref' => '#/components/schemas/Cart'
+      let(:cart_item) { nil }
 
+      generate_response_examples
+
+      response 201, 'Successful' do
         let!(:product) { create(:product, name: 'Test Product', price: 10.00) }
         let(:cart_item) { { cart: { product_id: product.id, quantity: 2 } } }
 
-        run_test! do |response|
-          data = JSON.parse(response.body)
-          expect(data).to have_key('id')
-          expect(data).to have_key('products')
-          expect(data['products'].length).to eq(1)
+        schema '$ref' => '#/components/schemas/v1/carts/responses/create'
+
+        it 'returns the correct data structure' do
+          expect(response_body).to have_key('id')
+          expect(response_body).to have_key('products')
+          expect(response_body).to have_key('total_price')
         end
+
+        it 'returns products with correct length' do
+          expect(response_body['products'].length).to eq(1)
+        end
+
+        it 'returns correct product data' do
+          cart_product = response_body['products'].first
+          expect(cart_product['name']).to eq('Test Product')
+          expect(cart_product['quantity']).to eq(2)
+        end
+
+        run_test!
       end
 
-      response '404', 'Product not found' do
+      response 404, 'Product not found' do
         let(:cart_item) { { cart: { product_id: 999, quantity: 1 } } }
+
+        it 'returns not found error' do
+          expect(response.status).to eq(404)
+        end
 
         run_test!
       end
@@ -59,39 +74,45 @@ RSpec.describe 'Carts API', type: :request do
   end
 
   path '/carts/add_item' do
-    post 'Add quantity to existing item' do
+    post 'Add quantity to existing item', params: { use_as_request_example: true } do
       tags 'Carts'
       consumes 'application/json'
-      parameter name: :cart_item, in: :body, schema: {
-        type: :object,
-        properties: {
-          cart: {
-            type: :object,
-            properties: {
-              product_id: { type: :integer },
-              quantity: { type: :integer }
-            },
-            required: ['product_id', 'quantity']
-          }
-        },
-        required: ['cart']
-      }
+      parameter name: :cart_item, in: :body, schema: { '$ref' => '#/components/schemas/v1/carts/requests/add_item' }
 
-      response '200', 'Quantity added successfully' do
-        schema '$ref' => '#/components/schemas/Cart'
+      let(:cart_item) { nil }
 
+      generate_response_examples
+
+      response 200, 'Successful' do
         let!(:product) { create(:product, name: 'Test Product', price: 10.00) }
         let(:cart_item) { { cart: { product_id: product.id, quantity: 1 } } }
 
-        run_test! do |response|
-          data = JSON.parse(response.body)
-          expect(data).to have_key('id')
-          expect(data).to have_key('products')
+        before do
+          post '/carts', params: { cart: { product_id: product.id, quantity: 1 } }
         end
+
+        schema '$ref' => '#/components/schemas/v1/carts/responses/add_item'
+
+        it 'returns the correct data structure' do
+          expect(response_body).to have_key('id')
+          expect(response_body).to have_key('products')
+          expect(response_body).to have_key('total_price')
+        end
+
+        it 'returns products with correct quantity' do
+          cart_product = response_body['products'].first
+          expect(cart_product['quantity']).to eq(2) # 1 + 1
+        end
+
+        run_test!
       end
 
-      response '404', 'Product not found' do
+      response 404, 'Product not found' do
         let(:cart_item) { { cart: { product_id: 999, quantity: 1 } } }
+
+        it 'returns not found error' do
+          expect(response.status).to eq(404)
+        end
 
         run_test!
       end
@@ -99,31 +120,45 @@ RSpec.describe 'Carts API', type: :request do
   end
 
   path '/carts/{product_id}' do
-    parameter name: :product_id, in: :path, type: :integer
+    parameter name: :product_id, in: :path, type: :string
 
-    delete 'Remove item from cart' do
+    delete 'Remove item from cart', params: { use_as_request_example: true } do
       tags 'Carts'
+      consumes 'application/json'
 
-      response '200', 'Item removed successfully' do
-        schema '$ref' => '#/components/schemas/Cart'
+      let(:product_id) { nil }
 
+      generate_response_examples
+
+      response 200, 'Successful' do
         let!(:product) { create(:product, name: 'Test Product', price: 10.00) }
         let(:product_id) { product.id }
 
         before do
-          # First add the product to cart
           post '/carts', params: { cart: { product_id: product.id, quantity: 1 } }
         end
 
-        run_test! do |response|
-          data = JSON.parse(response.body)
-          expect(data).to have_key('id')
-          expect(data).to have_key('products')
+          schema '$ref' => '#/components/schemas/v1/carts/responses/remove_item'
+
+        it 'returns the correct data structure' do
+          expect(response_body).to have_key('id')
+          expect(response_body).to have_key('products')
+          expect(response_body).to have_key('total_price')
         end
+
+        it 'returns empty products array' do
+          expect(response_body['products']).to be_empty
+        end
+
+        run_test!
       end
 
-      response '404', 'Item not found in cart' do
-        let(:product_id) { 999 }
+      response 404, 'Item not found in cart' do
+        let(:product_id) { '999' }
+
+        it 'returns not found error' do
+          expect(response.status).to eq(404)
+        end
 
         run_test!
       end

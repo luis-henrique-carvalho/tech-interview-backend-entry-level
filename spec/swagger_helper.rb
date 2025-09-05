@@ -3,6 +3,9 @@
 require 'rails_helper'
 
 RSpec.configure do |config|
+  # Activate schema strict mode
+  config.openapi_strict_schema_validation = true
+
   # Specify a root folder where Swagger JSON files are generated
   # NOTE: If you're using the rswag-api to serve API descriptions, you'll need
   # to ensure that it's configured to serve Swagger from the same folder
@@ -13,66 +16,39 @@ RSpec.configure do |config|
   # be generated at the provided relative path under openapi_root
   # By default, the operations defined in spec files are added to the first
   # document below. You can override this behavior by adding a openapi_spec tag to the
-  # the root example_group in your specs, e.g. describe '...', openapi_spec: 'v2/swagger.json'
+  # the root example_group in your specs, CL
+  paths = Dir.glob('spec/components/schemas/**/*.json')
+
+  path_contents = paths.reduce({}) do |previous_hash, path|
+    content = JSON.parse(File.read(path))
+    clean_path = path.gsub('spec/components/schemas/', '').gsub('.json', '').split('/')
+    full_schema = clean_path.reverse.inject(content) { |assigned_value, key| { key => assigned_value } }
+
+    previous_hash.deep_merge(full_schema)
+  end
+
   config.openapi_specs = {
     'v1/swagger.yaml' => {
       openapi: '3.0.1',
       info: {
-        title: 'Tech Interview Backend API',
-        version: 'v1',
-        description: 'API para sistema de e-commerce com produtos e carrinho de compras'
+        title: 'API V1',
+        version: 'v1'
       },
       paths: {},
+      components: {
+        securitySchemes: {
+          bearer_auth: {
+            type: :http,
+            scheme: :bearer
+          }
+        },
+        schemas: path_contents
+      },
       servers: [
         {
-          url: 'http://localhost:3000',
-          description: 'Servidor de desenvolvimento'
+          url: 'http://localhost:3000'
         }
-      ],
-      components: {
-        schemas: {
-          Product: {
-            type: 'object',
-            properties: {
-              id: { type: 'integer' },
-              name: { type: 'string' },
-              price: { type: 'string' },
-              created_at: { type: 'string', format: 'date-time' },
-              updated_at: { type: 'string', format: 'date-time' }
-            }
-          },
-          CartItem: {
-            type: 'object',
-            properties: {
-              id: { type: 'integer' },
-              name: { type: 'string' },
-              quantity: { type: 'integer' },
-              unit_price: { type: 'string' },
-              total_price: { type: 'string' }
-            }
-          },
-          Cart: {
-            type: 'object',
-            properties: {
-              id: { type: 'integer' },
-              products: {
-                type: 'array',
-                items: { '$ref' => '#/components/schemas/CartItem' }
-              },
-              total_price: { type: 'string' }
-            }
-          },
-          Error: {
-            type: 'object',
-            properties: {
-              errors: {
-                type: 'array',
-                items: { type: 'string' }
-              }
-            }
-          }
-        }
-      }
+      ]
     }
   }
 

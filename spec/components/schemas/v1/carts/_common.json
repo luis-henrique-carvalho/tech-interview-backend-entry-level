@@ -1,0 +1,20 @@
+{
+  "title": "Cart",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "total_price": {
+      "type": "number",
+      "format": "decimal"
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/v1/products/_common"
+      }
+    }
+  }
+}

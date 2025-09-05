@@ -1,0 +1,22 @@
+{
+    "update": {
+        "type": "object",
+        "properties": {
+            "product": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "decimal"
+                    }
+                }
+            }
+        },
+        "required": [
+            "product"
+        ]
+    }
+}

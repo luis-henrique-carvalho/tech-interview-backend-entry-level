@@ -1,0 +1,24 @@
+{
+    "title": "Add Item to Cart Request",
+    "type": "object",
+    "properties": {
+        "cart": {
+            "type": "object",
+            "properties": {
+                "product_id": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "product_id",
+                "quantity"
+            ]
+        }
+    },
+    "required": [
+        "cart"
+    ]
+}

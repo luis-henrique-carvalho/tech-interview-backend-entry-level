@@ -1,0 +1,4 @@
+{
+    "title": "Add Item to Cart Response",
+    "$ref": "#/components/schemas/v1/carts/_common"
+}

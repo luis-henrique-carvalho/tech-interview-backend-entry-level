@@ -1,0 +1,4 @@
+{
+    "title": "Remove Item from Cart Response",
+    "$ref": "#/components/schemas/v1/carts/_common"
+}

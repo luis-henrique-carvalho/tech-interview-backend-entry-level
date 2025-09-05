@@ -2,6 +2,8 @@ class CartsController < ApplicationController
   before_action :set_cart
   after_action :update_last_interaction_at, only: %i[add_item remove_item]
 
+  rescue_from ActiveRecord::RecordNotFound, with: :resource_not_found
+
   def show
     render json: format_cart_response(@cart)
   end
@@ -79,11 +81,15 @@ class CartsController < ApplicationController
           id: item.product_id,
           name: item.name,
           quantity: item.quantity,
-          unit_price: item.price,
-          total_price: item.total_price
+          unit_price: item.price.to_f,
+          total_price: item.total_price.to_f
         }
       end,
-      total_price: cart.total_price
+      total_price: cart.total_price.to_f
     }
+  end
+
+  def resource_not_found
+    render json: { error: 'Resource not found.' }, status: :not_found
   end
 end

@@ -1,0 +1,23 @@
+{
+  "title": "Product",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "unit_price": {
+      "type": "number",
+      "format": "decimal"
+    },
+    "total_price": {
+      "type": "number",
+      "format": "decimal"
+    }
+  }
+}

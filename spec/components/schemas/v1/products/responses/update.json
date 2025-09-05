@@ -1,0 +1,5 @@
+{
+    "update": {
+        "$ref": "#/components/schemas/Product"
+    }
+}

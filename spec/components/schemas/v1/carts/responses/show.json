@@ -1,0 +1,5 @@
+{
+    "title": "Show Cart Response",
+    "$ref": "#/components/schemas/v1/carts/_common"
+}
+
